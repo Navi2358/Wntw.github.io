@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spreeniverse - Un Mundo de Diversión</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; text-align: center; padding: 20px; background: linear-gradient(to right, #ff7e5f, #feb47b); color: #333; }
+        .container { width: 80%; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        h1 { color: #ff5722; font-size: 3em; }
+        h2 { color: #2196f3; }
+        .hidden { display: none; }
+        button { font-size: 1.2em; padding: 10px 20px; margin: 5px; background-color: #4caf50; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Spreeniverse - Un Mundo de Diversión</h1>
+        <p>¡Regístrate y disfruta de contenido exclusivo del universo de Spreen!</p>
+        <div id="authOptions">
+            <button onclick="mostrarRegistro()">Registrarse</button>
+            <button onclick="mostrarInicioSesion()">Iniciar Sesión</button>
+            <button onclick="mostrarAdmin()">Admin</button>
+        </div>
+        <form id="registroForm" class="hidden">
+            <label for="nombreUsuario">Nombre (máx. 4 letras)</label>
+            <input type="text" id="nombreUsuario" placeholder="Nombre (máx. 4 letras)" required pattern=".{1,4}" title="Máximo 4 letras"><br><br>
+            <label for="correo">Correo</label>
+            <input type="email" id="correo" placeholder="Correo" required><br><br>
+            <button type="submit">Registrarse</button>
+        </form>
+        <form id="loginForm" class="hidden">
+            <label for="loginNombreUsuario">Usuario</label>
+            <input type="text" id="loginNombreUsuario" placeholder="Usuario" required><br><br>
+            <button type="submit">Iniciar Sesión</button>
+        </form>
+        <section id="confirmacionRegistro" class="hidden">
+            <h2>Registro Exitoso</h2>
+            <p>¡Bienvenido, <span id="usuarioRegistrado"></span>!</p>
+        </section>
+        <section id="verificarAdmin" class="hidden">
+            <h2>Admin</h2>
+            <label for="claveAdmin">Clave</label>
+            <input type="password" id="claveAdmin" placeholder="Clave" required><br><br>
+            <button onclick="verificarAdmin()">Verificar</button>
+            <p id="listaUsuarios" class="hidden"></p>
+            <button id="banearBtn" class="hidden" onclick="banearUsuario()">Banear</button>
+        </section>
+    </main>
+    <script>
+        let usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+        const $ = id => document.getElementById(id);
+
+        function mostrarRegistro() { $('authOptions').style.display = 'none'; $('registroForm').style.display = 'block'; }
+        function mostrarInicioSesion() { $('authOptions').style.display = 'none'; $('loginForm').style.display = 'block'; }
+        function mostrarAdmin() { $('authOptions').style.display = 'none'; $('verificarAdmin').style.display = 'block'; }
+
+        $('registroForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nombre = $('nombreUsuario').value, correo = $('correo').value;
+            if (usuarios.some(usuario => usuario.nombre === nombre)) { alert('Nombre no disponible.'); return; }
+            usuarios.push({ nombre, correo });
+            localStorage.setItem('usuarios', JSON.stringify(usuarios));
+            $('usuarioRegistrado').textContent = nombre;
+            $('registroForm').style.display = 'none';
+            $('confirmacionRegistro').style.display = 'block';
+        });
+
+        $('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nombre = $('loginNombreUsuario').value, usuario = usuarios.find(u => u.nombre === nombre);
+            if (usuario) { $('usuarioRegistrado').textContent = nombre; $('loginForm').style.display = 'none'; $('confirmacionRegistro').style.display = 'block'; }
+            else { alert('No existe'); }
+        });
+
+        function verificarAdmin() {
+            if ($('claveAdmin').value === '54admin') {
+                $('listaUsuarios').innerHTML = usuarios.map(u => u.nombre + ' - ' + u.correo).join('<br>');
+                $('listaUsuarios').style.display = 'block';
+                $('banearBtn').style.display = 'block';
+            } else { alert('Clave incorrecta'); }
+        }
+
+        function banearUsuario() {
+            const nombre = prompt('Usuario a banear:');
+            usuarios = usuarios.filter(u => u.nombre !== nombre);
+            localStorage.setItem('usuarios', JSON.stringify(usuarios));
+            verificarAdmin();
+        }
+    </script>
+</body>
+</html>
